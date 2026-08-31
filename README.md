@@ -149,7 +149,7 @@ This test suite evaluates the local fallback capacity of the interactive **Audio
 ## 011_create_sheet_augmentation.robot
 This test suite evaluates placing a textual notepad block (**Note / Sheet**) onto an environment target while working online.
 * **Create Activity & Target Setup**: Follows standard sequences to initialize an **Augmented activity** template and register a visual target anchor frame.
-* **Add sheet to the augmentation**: Interacts with the overlay toolbar to select the "Note" tool component. Note: Inline text typing within this note element currently contains placeholder comment structures (`#TODO edit the sheet, unclickable`) awaiting finalized implementation paths.
+* **Add sheet to the augmentation**: Interacts with the overlay toolbar to select the "Note" tool component, then clicks the rendered overlay itself (not the toolbar panel) to open its Tiptap/ProseMirror rich-text editor and replaces the default placeholder content with actual text.
 * **Display augmentation**: Ensures that placing an empty note anchor container successfully passes execution pipelines.
 
 ## 011_create_sheet_augmentation_offline.robot
@@ -230,11 +230,11 @@ Validates the online creation wizard for a "Guided Path". It initializes a new p
 ## 020_create_empty_guided_path_offline.robot
 Ensures that the pedagogical wizard remains completely operational while offline, allowing teachers or authors to configure and locally save a "Guided Path" without an active internet connection.
 
-## 021_add_activities_to_path.robot
-Validates the online layout management and sequencing system. The test creates two separate empty activities and an empty learning path, then tests the user experience by using drag-and-drop operations to successfully assign both activities into the path.
+## 021_add_activity_to_path.robot
+Validates the online drag-and-drop workflow for assigning an activity to a learning path, both under normal conditions and under throttled "Slow 3G" network conditions. It creates one empty activity and one empty path, then drags the activity onto the path's card.
 
-## 021_add_activities_to_path_offline.robot
-Verifies that the interactive drag-and-drop workflow for assigning multiple activities into a learning path functions reliably in an offline state using local layout persistence.
+## 021_add_activity_to_path_offline.robot
+Verifies that the same drag-and-drop workflow for assigning an activity to a learning path functions reliably while offline.
 
 ## 022_sign_up.robot
 Tests the user registration flow within the application. It opens the user identity interface, populates username, email, and password credentials, submits the registration form, and validates successful account creation by checking for the authenticated user session indicator.
@@ -253,3 +253,155 @@ Tests the AI image asset generation workflow. It initializes an augmented activi
 
 ## 027_generate_audio_augmentation.robot
 Validates the text-to-speech AI generation component. The workflow establishes a target AR tracking scene, utilizes the text-to-speech option inside the AI authoring tool to generate an audio preview from a string ("Hello world !"), mounts the audio asset to the overlay layer, and verifies detection behaviors.
+
+## 028_load.robot
+Stress-tests the local creation and layout pipeline by working entirely in an unauthenticated session (the browser is opened without signing in and kept open across both test cases). It creates eight augmented activities in a row (`activité numéro 1` through `8`), creates a single empty path, and then drags all eight activities into that path to confirm the drag-and-drop sequencing holds up under a larger batch of items.
+
+## 029_tag.robot
+Validates the tag/label management workflow on an activity. It creates a single activity, opens the labels panel to attach a new tag (`tag numéro 1`) through the label creation input, then in a second test case reopens the panel and removes that same tag, confirming the deletion through the confirmation dialog.
+
+## 030_text_updates_augmentation.robot
+Validates the rich-text editing controls of a text overlay inside an Augmented Activity while online. After creating the activity and snapping a background target, it adds a text element and edits its content, then toggles the bold, italic, and small-caps formatting buttons in turn, asserting the underlying text area's computed `font-weight`, `font-style`, and `font-variant` CSS values change accordingly, before finally resetting all styles back to normal and re-asserting the default values.
+
+## 030_text_updates_augmentation_offline.robot
+Repeats the text overlay formatting checks from 030_text_updates_augmentation.robot (add, edit, bold, italic, small-caps, normal) entirely under offline network conditions, confirming that the rich-text editor's style toggles and their computed CSS side effects work purely from local client-side state.
+
+## 031_import.robot
+Validates the single-activity cross-account sharing flow. One user creates a single activity and generates a share code through the cloud sync modal, a second user imports it using that code, and the imported activity is then launched to confirm the tracking session mounts correctly. This is the single-activity precursor to the path-sharing scenario covered by 032_load_import.robot.
+
+## 032_load_import.robot
+Validates the full cross-account sharing and import lifecycle for a learning path. It signs in as one user, creates one activity through the full wizard and obtains seven more by chain-duplicating it (each duplicate is made from the previous copy, not the original, so the app's automatic " (copy)" suffix keeps stacking into unique titles), creates an empty path, drags all eight activities into it, then triggers the cloud sync/share flow to generate an 8-character share code. It then signs in as a second user, imports the path using that code, and launches the imported activity to confirm the tracking session mounts correctly.
+
+Because the test accounts accumulate activities and paths across repeated runs (there is no teardown step and the accounts cannot be cleared), every activity and path title is suffixed with a random string generated at runtime so that XPath lookups by title never collide with stale data from a previous execution. The drag-and-drop target, the sync button, and the duplicate menu button are all scoped to the specific card they belong to (via its own `activity-card--group`/`activity-card--augmentation` ancestor, or the 3rd `div` ancestor of its title) rather than matching the first matching element on the page, since the account's home grid can contain several same-named cards from earlier runs. Interactions that are prone to layout shifts or swallowed clicks on a large, slow-loading account (the initial card click, the duplicate menu, the import modal) are retried with `Wait Until Keyword Succeeds`. The browser is also launched with Chrome's password leak detection and password manager disabled, since the test account intentionally uses a simple, non-sensitive password that would otherwise trigger a native "compromised password" prompt and kill the WebDriver session.
+
+## 033_filter_basic.robot
+Validates the home screen's type filter control. It creates one path and one activity, opens the filter panel, and selects the "activity" filter option to assert exactly one activity-typed card remains visible, then switches to the "path" filter option and asserts exactly one path-typed card remains visible.
+
+## 034_duplicate.robot
+Validates the activity duplication feature. It creates a single empty activity, duplicates it through its card's menu, and asserts that the home grid now shows two activity cards, confirming the duplicate was created successfully.
+
+## 035_search_and_find_success.robot
+Validates the successful completion path of a Search and Find activity, both online and offline. After creating the activity, it asserts that the validation pill shown once the target is found reads exactly "Well done!".
+
+## 036_search_and_find_fail.robot
+Validates the failure path of a Search and Find activity, both online and offline, using a deliberately mismatched target/detection setup. It asserts that the validation pill reads "Too bad!" instead of the success message, confirming the activity correctly reports a missed detection.
+
+## 037_pairs.robot
+Validates the creation of a Pair Association activity, both online and offline. After entering the title and instructions, it fills the two side-by-side marker slots ("Marker 1" and "Marker 2") by uploading a distinct local image to each one, then checks for the "Well done!" validation pill. Each marker's upload control is scoped by the text of its own `mk-upload__marker-slot-label` (`Marker 1` / `Marker 2`), since both slots share identical classes and only differ by that label.
+
+## 038_layers.robot
+Validates the creation of a blank Information Layers activity, both online and offline, confirming the basic layers wizard completes without errors.
+
+## 039_layers_layering.robot
+Extends the Information Layers coverage by creating an activity with multiple layers, both online and offline: it adds several layers, populates each one with content, and verifies that every layer is present and holds the expected content once the activity is built.
+
+## 040_verify_language_changes.robot
+Validates the application's language switcher across five locales (French, English, Danish, Greek, Turkish). For each language, it opens the language dropdown, selects the target locale by its native name, and checks that known UI text has been translated accordingly, confirming the i18n switch takes effect for every supported language in the list.
+
+## 041_audio_tool.robot
+Validates the Audio overlay tool's two content sources on an Augmented Activity. The microphone scenario opens the Audio tool, starts a recording using Chrome's fake microphone feed (`--use-file-for-fake-audio-capture`, configured in `Set Chrome Options` to play back `assets/moo1.wav`), stops the recording, confirms it, and plays it back. The upload scenario instead attaches a local audio file directly to the tool's hidden file input (`id=basic_file`), bypassing the native OS file picker that Selenium cannot drive. The record/pause button is located by its Material icon `data-testid` (`CircleIcon` while idle, `PauseIcon` while recording) rather than by class, since both states share the exact same button element and CSS classes.
+
+## 042_restore_path.robot
+Validates the delete/restore recovery flow for a learning path, both under normal conditions and under throttled "Slow 3G" network conditions. It creates an empty path, deletes it (capturing its "data-id" from "Delete Activity Or Path"), then restores it from the Trash via that same id and confirms the restore action succeeds.
+
+## 043_update_propagation_on_import.robot
+Validates that an update made after sharing propagates to an already-imported copy. Account 1 creates an activity and generates a share code; account 2 imports it. Account 1 then reopens the *original* activity (via its card menu's "Edit" action, not the "Open activity" AR-player button), adds a text overlay, and resynchronizes it. Account 2 finally reopens its *imported* copy the same way and asserts the new text is present. Reopening an already-published activity for editing paginates title/instructions/description across separate "Next" steps before reaching the augmentation canvas - unlike the single combined page used during initial creation - handled by the "Reopen Activity Editor" keyword.
+
+## 044_verify_language_change_offline.robot
+Repeats the language switcher checks from 040_verify_language_changes.robot (French, English, Danish, Greek, Turkish) entirely offline, confirming the i18n strings and locale switching work purely from local client-side state without a server round-trip.
+
+## 045_audio_tool_offline.robot
+Repeats the two Audio overlay scenarios from 041_audio_tool.robot (microphone recording and file upload) entirely offline, confirming the Audio tool's recording, playback, and file-attachment paths don't depend on network connectivity.
+
+## 046_load_offline.robot
+Repeats the stress test from 028_load.robot (eight augmented activities created in a row, then dragged into a single path) entirely offline, confirming the creation and drag-and-drop-into-path pipeline holds up under a larger batch of items without any network connectivity.
+
+## 047_tag_offline.robot
+Repeats the tag/label workflow from 029_tag.robot (attach a tag, then remove it) entirely offline, confirming the labels panel works purely from local state.
+
+## 048_duplicate_offline.robot
+Repeats the activity duplication check from 034_duplicate.robot entirely offline: it creates a single empty activity, duplicates it through its card's menu, and asserts the home grid shows two activity cards.
+
+## 049_update_propagation_on_template_import.robot
+The negative counterpart to 043_update_propagation_on_import.robot, run both under normal and throttled "Slow 3G" network conditions. Account 1 creates an activity and generates a *template* share code (not a read-only one) for it; account 2 imports it. Account 1 then reopens the original activity, adds a text overlay, and resynchronizes it. Unlike the read-only import case, a template import is an independent copy with no link back to the original, so account 2's copy must NOT show an "updated recently" badge after account 1's resync - confirming template imports are correctly decoupled from their source.
+
+## 050_search_activity.robot
+Validates the home menu's search box. Creates two activities whose titles share no common word (the search box matches on individual words, not full substrings, so any shared word would make both cards match either search), then confirms searching one title's exact text shows only its own card, searching the other title swaps which card is shown, and clearing the search restores both.
+
+## 051_empty_animated_augment.robot
+Validates creating an Augmented activity using the built-in animated template image (via "Use template image") instead of snapping a live camera background, confirming the wizard completes and the resulting activity detects successfully.
+
+## 052_tag_filtering.robot
+Validates tag-based filtering on the home grid. Creates an activity and tags it, creates a second, untagged activity, then confirms that filtering by the tag narrows the grid from 2 activities down to just the 1 that carries it.
+
+## 053_sort_activities.robot
+Validates the home menu's "Sort" control (A-Z / Z-A). Creates two activities with alphabetically distinct titles, confirms the default "Sort A-Z" state places the earlier-alphabet title before the later one in the grid's DOM order, then confirms switching to "Sort Z-A" reverses that relative order and switching back to "Sort A-Z" restores it. Comparisons use DOM order (via the "Activity Should Appear Before" keyword) rather than on-screen position, since the app's own UI explicitly warns that its masonry grid layout can visually reposition cards even when the underlying sort is applied correctly.
+
+## 054_update_propagation_offline.robot
+The offline counterpart to 043_update_propagation_on_import.robot. The same create/share/import/update/verify sequence is run with both accounts going offline around each local action (activity creation, adding the text overlay) and back online only to sync/resync/reload, confirming the update-propagation behavior holds even when the edits themselves happen while disconnected.
+
+## 055_sort_activities_offline.robot
+Repeats the sort-order checks from 053_sort_activities.robot (default A-Z, switch to Z-A, switch back to A-Z) entirely offline, confirming the "Sort" control's effect on DOM order works purely from local state.
+
+## 056_tag_filtering_offline.robot
+Repeats the tag-filtering check from 052_tag_filtering.robot entirely offline: creates a tagged activity and a second, untagged one, then confirms filtering by the tag narrows the grid down to just the tagged activity.
+
+## 057_create_activity_offline_while_connected.robot
+Validates that an activity created while offline gets synced to the cloud automatically once connectivity returns, without any explicit sync action from the user. Signs up a fresh account, goes offline, creates an empty activity, then goes back online and signs out without ever touching the sync button. It then signs back into the same account in a brand new browser session and confirms the activity is there, proving the app queued and flushed the sync on its own.
+
+## 058_offline_text_edit_after_online_creation.robot
+Validates that a text overlay added to an activity while online remains present and editable after going offline. Creates an activity with a text overlay while online, then reopens the activity's editor - which requires connectivity, since "Reopen Activity Editor" reloads the page internally - and only then goes offline, confirming the original text is still rendered via "Augmentation Should Contain Text" (DOM presence). Still offline, it clicks directly on the rendered text overlay itself (not the "Text" toolbar button, which is for adding a brand new element and does nothing when one is already selected - confirmed live via a failed run's screenshot) to reopen it pre-filled for editing, then replaces its content and confirms the new value took, proving the editor stays fully functional against local/cached state after the connection drops.
+
+## 059_offline_image_after_online_creation.robot
+The image counterpart to 058_offline_text_edit_after_online_creation.robot. Creates an activity with an image overlay while online, then reopens the activity - while still online, for the same page-reload-needs-connectivity reason as 058 - and only then goes offline. Since an image overlay has no meaningful text value to match on, presence is confirmed via "Get Augmentation Content Count" instead of content matching: the rendered overlay count must be 1.
+
+## 060_offline_audio_after_online_creation.robot
+The audio counterpart to 058_offline_text_edit_after_online_creation.robot. Creates an activity with an uploaded audio overlay (via the same tool selectors as 041_audio_tool.robot) while online, then reopens the activity - while still online, for the same page-reload-needs-connectivity reason as 058 - and only then goes offline, confirming the audio overlay's rendered count is 1 via "Get Augmentation Content Count".
+
+## 061_offline_video_after_online_creation.robot
+The video counterpart to 058_offline_text_edit_after_online_creation.robot, following the same pattern as 059/060: creates an activity with a video overlay online, reopens it while still online, goes offline, then confirms the rendered overlay count is 1 via "Get Augmentation Content Count".
+
+## 062_offline_sticker_after_online_creation.robot
+The sticker counterpart to 058_offline_text_edit_after_online_creation.robot, following the same pattern as 059/060: creates an activity with a stock sticker overlay online, reopens it while still online, goes offline, then confirms the rendered overlay count is 1 via "Get Augmentation Content Count".
+
+## 063_offline_3d_object_after_online_creation.robot
+The 3D object counterpart to 058_offline_text_edit_after_online_creation.robot, following the same pattern as 059/060: creates an activity with a 3D object overlay (.fbx upload) online, reopens it while still online, goes offline, then confirms the rendered overlay count is 1 via "Get Augmentation Content Count".
+
+## 064_offline_link_after_online_creation.robot
+The link counterpart to 058_offline_text_edit_after_online_creation.robot, following the same pattern as 059/060: creates an activity with a link overlay online, reopens it while still online, goes offline, then confirms the rendered overlay count is 1 via "Get Augmentation Content Count".
+
+## 065_offline_sheet_after_online_creation.robot
+The note/sheet counterpart to 058_offline_text_edit_after_online_creation.robot, made possible once "Add Sheet To Augmentation" gained real text-editing support (see its docstring in ressources.robot). Unlike 059-064 which only check a rendered overlay count, this one - like 058 - verifies actual text content: creates an activity with a note overlay online, reopens it while still online, goes offline, clicks the rendered overlay to open its editor and confirms the text is still there, then edits it again while offline and confirms the new text took.
+
+## 066_guided_path_navigation.robot
+Validates the AR player's step navigation for a Guided Path. Creates two activities and adds both to a Guided Path in order, then launches the path directly (via "Play Path") and asserts the player's "previous" control starts disabled on the first activity, becomes enabled after clicking "next" to advance to the second, and is disabled again after clicking "previous" back to the first. Verified live: navigating with "next"/"previous" is not gated on the current activity's target actually being detected - the buttons are only disabled at the path's start/end boundaries, not on detection state.
+
+## 067_remove_activity_from_path.robot
+Validates that an activity can be removed from a path without deleting the activity itself. The real mechanism is non-obvious: the mini-card's own "..." menu inside the path content drawer looks like the natural place to look, but its "Delete" item is actually a full, irreversible deletion of the activity everywhere (confirmed via its "Are you sure you want to delete this activity? This action cannot be undone." dialog and the activity disappearing from the home grid too - see "Delete Activity From Path Drawer By Id" in ressources.robot for that destructive action). The actual non-destructive removal is: click the mini-card's title to select it, which reveals a floating "N selected / Remove / Clear" action bar at the bottom of the drawer, then click "Remove" (no confirmation dialog). This test creates two activities and a path containing both, confirms both are present, removes one via that select-and-remove flow, confirms the path now contains only the other, and confirms the removed activity still exists as its own independent card on the home grid.
+
+## 068_multi-tag-filtering.robot
+Validates that selecting more than one tag in the home menu's label filter combines them with OR, not AND: creates three activities (one tagged "tag numéro 1" only, one tagged "tag numéro 2" only, one tagged with both), then walks through selecting tag one alone (2 activities), adding tag two on top (all 3 - confirming OR, since only activity three actually carries both), deselecting tag one (back to the 2 activities carrying tag two), and deselecting tag two (all 3, filter cleared). Getting here required two real "Add Tag to Activity" bugs to be fixed in ressources.robot: it only ever used the empty-state "add first tag" trigger button, silently failing to attach a second tag to the same activity (the trigger becomes a different element once one tag exists); and it only ever typed into the "create a brand new tag" input, which silently does nothing when that name already exists as a label elsewhere in the account (the correct action is clicking the existing tag chip the panel already offers) - both are exactly the situation a "third activity with both tags, where both tag names were already used by the first two activities" scenario hits. Also applies the same stale-hidden-DOM-node fix already used for Ant Design dropdown menus elsewhere to "Filter by tag" itself, since reopening this panel multiple times in one run (never previously exercised before this test) hit the same issue.
+
+## 069_onboarding_main.robot
+Covers the "main" onboarding tour (src/features/onboarding/tours/mainTour.ts), a driver.js-driven guided tour that auto-triggers the first time a fresh account visits Home. It's a single popover with no driver.js Previous/Next/Close footer buttons ("showButtons: []") - only two custom "I'm a teacher"/"I'm a student" role-picker buttons injected via onPopoverRender (the corner "X" close button is a separate driver.js fixture, unaffected by showButtons, and is still present). Verifies the tour appears with both role buttons and no footer Next/Previous, that picking either role marks "main" completed and launches the corresponding tour (teacher/student - see 070/071), and that replaying the tour later from the header's "Replay guided tour" menu item re-shows it even after it's already been seen. Uses the "Onboarding tour" keyword family added to ressources.robot this session (Wait For Onboarding Popover, Click Onboarding Next/Close Button, Choose Onboarding Role, Reset Onboarding Tour Flag, Onboarding Tour Should Be Marked Completed, etc.) - see their docstrings for the driver.js/app-integration details those keywords account for.
+
+## 070_onboarding_teacher.robot
+Full step-by-step walkthrough of the "teacher" tour (teacherTour.ts, ~33 array steps counting sub-labelled ones like "15b"/"25b") - reached via the "main" tour's "I'm a teacher" role picker. This is the app's entire core workflow chained together through the tour overlay: sign up, create an Augmented activity (marker photo, text, stickers, try it), create a Group path, sync it to the cloud and generate a share code. Most steps' real target IS an existing keyword's own click target (Editor.tsx's "data-tour" attributes match "Next button"/"Click home button"; "Snap the background"/"Validate the image"/"Validation button" match the marker capture/compile steps), so performing the real action also advances the tour via driverInstance.ts's onHighlighted click listener. Split into two test cases (activity creation, then path creation + cloud sync) since the tour spans an editor-close/reopen boundary. Ends by deliberately closing the tour via its "X" if it's still stuck on the cloud-sync "Generate" button's step - that real click (performed through "Generate Share Code With Id") occasionally races ahead of the tour noticing, and by that point the workflow this tour exists to demonstrate has already been fully exercised for real.
+
+## 071_onboarding_student.robot
+Full step-by-step walkthrough of the "student" tour (studentTour.ts, 7 steps) - reached via the "main" tour's "I'm a student" role picker. Much shorter than teacherTour.ts: students import an activity a teacher already shared rather than build one. Its one action step opens the Import modal ("[data-tour='home-import-activity']"); the two freedom steps (pick a real import path / general exploration) are advanced via the popover's own Next button rather than performing an actual cross-account share-code import.
+
+## 072_onboarding_pair_association.robot
+Full step-by-step walkthrough of the "pairAssociation" tour (pairAssociationTour.ts, 10 steps) - auto-triggers the first time a fresh account picks the "Pair Association" card from the New activity menu. Covers naming, the two-marker-slot upload (each slot needs its own upload-trigger click before its underlying hidden file input exists - the two slots do NOT share one already-present input), and the tail steps. Verified live that "advanceOnElementAppear" auto-advance (driverInstance.ts) can be reliable for one freedom step and inconsistent for the very next one in the same tour, so marker-slot uploads use "Onboarding Popover Should Have Advanced From Or Click Next" (falls back to a manual Next click) rather than assuming the MutationObserver signal always fires.
+
+## 073_onboarding_search_and_find.robot
+Full step-by-step walkthrough of the "searchAndFind" tour (searchAndFindTour.ts, 13 steps) - auto-triggers the first time a fresh account picks the "Search and Find" (Validation type) card. Unlike Pair Association, this type genuinely goes through marker capture and compilation, so "Snap the background"/"Validate the image"/"Validation button" perform the real clicks several of its action steps target. Confirms this tour's "seen" flag DOES persist correctly when driven to natural completion - see 075/076 for the two single-step tours where it doesn't.
+
+## 074_onboarding_information_layer.robot
+Full step-by-step walkthrough of the "informationLayer" tour (informationLayerTour.ts, 17 steps) - auto-triggers the first time a fresh account picks the "Information layers" (Superposition type) card. Steps 1-9 mirror searchAndFindTour's naming + marker capture/compile sequence; two steps drive the real LayersPanel UI directly by its own BEM classes (add a layer, confirm its inline name input) since informationLayerTour.ts's own comment says those are already unique/stable with no dedicated data-tour attributes.
+
+## 075_onboarding_auto_triggered_path.robot
+Covers the "autoTriggeredPath" tour (autoTriggeredPathTour.ts) - a single info-step tour (no dedicated wizard steps of its own) that auto-triggers the first time a fresh account picks "Auto-Triggered path" from the New Path menu. Documents a confirmed live app bug: closing this tour (via either its Next/Done button or the X) never persists "mixap.onboarding.autoTriggeredPathCompleted" to localStorage at all (verified by monkey-patching localStorage.setItem - the key is never touched), while "main"/"teacher"/"student" and the other four activity-type tours complete correctly. Kept as a real, expected-to-fail assertion rather than weakened, so this test accurately reports the bug instead of hiding it. A second test case isolates the READ/gating side of tour suppression from that write-side bug by setting the flag directly via localStorage and confirming ActivityMenu.tsx correctly honors it (does not re-show the tour) once it IS set.
+
+## 076_onboarding_guided_path.robot
+The "guidedPath" counterpart to 075 - same single-info-step structure, same confirmed write-side persistence bug (documented there in full), triggered by picking "Guided Path" instead of "Auto-Triggered path" from the New Path menu.

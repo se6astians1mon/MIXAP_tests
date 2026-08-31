@@ -1,35 +1,43 @@
 *** Settings ***
 Library    SeleniumLibrary
 Library    OperatingSystem
+Library    String
 Resource       ./ressources.robot
 
-*** Variables ***
-
-${URL}    https://mixap-lium-preprod.univ-lemans.fr/
-${PATH_TITLE}    parcours numéro 1
-
+Suite Teardown    Run Keyword And Ignore Error    Close All Browsers
 
 *** Test Cases ***
 Sign in
+    [Documentation]    Uses a freshly signed-up, randomly-generated account instead of one of the shared test accounts, so this run doesn't add to their ever-growing history.
     Open Web Application
     Maximize Browser Window
-    Wait Until Element Is Visible    xpath=//button[.//span[contains(@class, 'anticon anticon-user')]]    15s
-    Click Element    xpath=//button[.//span[contains(@class, 'anticon anticon-user')]]
-    Wait Until Element Is Visible    xpath=//button[text()='Login']    15s
-    Click Element    xpath=//button[text()='Login']
-    Input Text    xpath=//input[@placeholder='you@company.com']    test@example.com
-    Input Text    xpath=//input[@placeholder='••••••••']    password123
-    Click Element    xpath=//button[text()='Continue']
-    Sleep    5s
-    Wait Until Element Is Visible    xpath=//button[.//span[text()='testuser']]    15s
+    ${username}=    Generate Random String    10    [LETTERS][NUMBERS]
+    Sign Up    test_${username}    test_${username}@example.com    password123
+    Wait Until Element Is Visible    xpath=//button[.//span[text()='test_${username}']]    15s
 
 Create activity
-    Create empty augementation    activité numéro 1
+    Create empty augmented activity   activité numéro 1
 
 Synchronize activity
-    Wait Until Element Is Visible    xpath=//button[contains(@class, 'activity-card__action-button activity-card__action-button--sync')]    15s
-    Click Element    xpath=//button[contains(@class, 'activity-card__action-button activity-card__action-button--sync')]
-    Sleep    5s
-    Wait Until Element Is Visible    xpath=//button[contains(@class, 'activity-card__action-button activity-card__action-button--sync uploaded')]    15s
+    Synchronize Activity
+    Close Sync Status Modal
+    Delete Account    password123
+    Close Browser
 
+Sign in - Slow 3G
+    [Documentation]    Uses a freshly signed-up, randomly-generated account instead of one of the shared test accounts, so this run doesn't add to their ever-growing history.
+    Open Web Application
+    Set Network Speed
+    Maximize Browser Window
+    ${username}=    Generate Random String    10    [LETTERS][NUMBERS]
+    Sign Up    test_${username}    test_${username}@example.com    password123
+    Wait Until Element Is Visible    xpath=//button[.//span[text()='test_${username}']]    15s
+
+Create activity - Slow 3G
+    Create empty augmented activity   activité numéro 1 Slow3G
+
+Synchronize activity - Slow 3G
+    Synchronize Activity
+    Close Sync Status Modal
+    Delete Account    password123
     Close Browser

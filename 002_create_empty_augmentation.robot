@@ -3,13 +3,10 @@ Library    SeleniumLibrary
 Library    OperatingSystem
 Resource       ./ressources.robot
 
-*** Variables ***
-
-${URL}    https://mixap-lium-preprod.univ-lemans.fr/
-
+Suite Teardown    Run Keyword And Ignore Error    Close All Browsers
 
 *** Test Cases ***
-Create empty augementation
+Create empty augmented activity
     Open Web Application
     Create Activity
 
@@ -19,7 +16,6 @@ Select Type
 Edit activity details
     Edit Activity Title    activité numéro 1
     Edit Activity Instructions    instruction relative à l'activité numéro 1
-    #Edit Activity Description    description de l'activité numéro 1
 
 Snap the background
     Next button
@@ -28,19 +24,43 @@ Snap the background
     Sleep    2s
     Validate the image
 
-display augementation
+display activity
     Next button
     Sleep    2s
     Validation button
     Sleep    2s
     Next button
     Sleep    2s
-    ${status}    ${message}=    Run Keyword And Ignore Error    Wait for detection
-    Run Keyword If    '${status}' == 'FAIL'    Log    ⚠️ Expected behavior: The element is still visible after 25s miss detection.    WARN
-    #IF Element Is Visible    xpath=//div[contains(@class, 'ant-notification-notice-wrapper')]
-    #    Click Element    xpath=//a[contains(@class, 'ant-notification-notice-close')]
-    #END
+    Wait For Detection Or Log Miss
     Click home button
-#    sleep     20s     #used to watch the result can be commentend if necessary
+    Close Browser
 
+Create empty augmented activity - Slow 3G
+    Open Web Application
+    Set Network Speed
+    Create Activity
+
+Select Type - Slow 3G
+    Select Activity Type    Augmented activity
+
+Edit activity details - Slow 3G
+    Edit Activity Title    activité numéro 1 Slow3G
+    Edit Activity Instructions    instruction relative à l'activité numéro 1
+
+Snap the background - Slow 3G
+    Next button
+    Sleep    2s
+    Snap the background
+    Sleep    2s
+    Validate the image
+
+display activity - Slow 3G
+    Next button
+    Sleep    2s
+    Validation button
+    Sleep    2s
+    Next button
+    Sleep    2s
+    Wait For Detection Or Log Miss
+    Click home button
     Close Browser

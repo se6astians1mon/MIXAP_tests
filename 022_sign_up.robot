@@ -1,28 +1,29 @@
 *** Settings ***
 Library    SeleniumLibrary
 Library    OperatingSystem
+Library    String
 Resource       ./ressources.robot
 
-*** Variables ***
-
-${URL}    https://mixap-lium-preprod.univ-lemans.fr/
-${PATH_TITLE}    parcours numéro 1
-
+Suite Teardown    Run Keyword And Ignore Error    Close All Browsers
 
 *** Test Cases ***
 Sign up
+    [Documentation]    Uses a freshly-generated random username/email instead of a hardcoded shared account, so this run doesn't add to a shared account's ever-growing history (and doesn't collide with a previous run's already-registered email).
     Open Web Application
     Maximize Browser Window
-    Wait Until Element Is Visible    xpath=//button[.//span[contains(@class, 'anticon anticon-user')]]    15s
-    Click Element    xpath=//button[.//span[contains(@class, 'anticon anticon-user')]]
-    Wait Until Element Is Visible    xpath=//button[text()='Sign up']    15s
-    Click Element    xpath=//button[text()='Sign up']
-    Wait Until Element Is Visible    xpath=//input[@placeholder='your_username']    15s
-    Input Text    xpath=//input[@placeholder='your_username']    testuser3
-    Input Text    xpath=//input[@placeholder='you@company.com']    test3@example.com
-    Input Text    xpath=//input[@placeholder='••••••••']    password123
-    Click Element    xpath=//button[text()='Create account']
-    Sleep    5s
-    Wait Until Element Is Visible    xpath=//button[.//span[text()='testuser3']]    15s
+    ${username}=    Generate Random String    10    [LETTERS][NUMBERS]
+    Sign Up    ${username}    ${username}@example.com    password123
+    Wait Until Element Is Visible    xpath=//button[.//span[text()='${username}']]    15s
+    Delete Account    password123
+    Close Browser
 
+Sign up - Slow 3G
+    [Documentation]    Same as above, under throttled network conditions.
+    Open Web Application
+    Set Network Speed
+    Maximize Browser Window
+    ${username}=    Generate Random String    10    [LETTERS][NUMBERS]
+    Sign Up    ${username}    ${username}@example.com    password123
+    Wait Until Element Is Visible    xpath=//button[.//span[text()='${username}']]    15s
+    Delete Account    password123
     Close Browser

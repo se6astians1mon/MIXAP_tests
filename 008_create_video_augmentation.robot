@@ -3,13 +3,10 @@ Library    SeleniumLibrary
 Library    OperatingSystem
 Resource       ./ressources.robot
 
-*** Variables ***
-
-${URL}    https://mixap-lium-preprod.univ-lemans.fr/
-
+Suite Teardown    Run Keyword And Ignore Error    Close All Browsers
 
 *** Test Cases ***
-Create empty augementation
+Create empty augmented activity
     Open Web Application
     Create Activity
 
@@ -18,8 +15,6 @@ Select Type
 
 Edit activity details
     Edit Activity Title    activité numéro 1
-    #Edit Activity Instructions    instruction relative à l'activité numéro 1
-    #Edit Activity Description    description de l'activité numéro 1
 
 Snap the background
     Next button
@@ -30,27 +25,42 @@ Snap the background
     Next button
     Sleep    2s
     Validation button
-    #Next button
 
-Add video to the augmentation
-    Wait Until Element Is Visible    xpath=//button[@title='Video']    15s
-    Click Element    xpath=//button[@title='Video']
+Add video to the activity
+    Add Video To Augmentation
 
-    Wait Until Element Is Visible    xpath=//div[contains(@class, 'ant-typography') and contains(., 'Click to edit...')]    15s
-    Click Element    xpath=//div[contains(@class, 'ant-typography') and contains(., 'Click to edit...')]
-
-    Choose File    xpath=//input[@type='file']    ${EXECDIR}/tests/assets/pexels.mp4
-
-    Next button
-
-display augementation
+display activity
     Sleep    2s
-    ${status}    ${message}=    Run Keyword And Ignore Error    Wait for detection
-    Run Keyword If    '${status}' == 'FAIL'    Log    ⚠️ Expected behavior: The element is still visible after 25s miss detection.    WARN
-    #IF Element Is Visible    xpath=//div[contains(@class, 'ant-notification-notice-wrapper')]
-    #    Click Element    xpath=//a[contains(@class, 'ant-notification-notice-close')]
-    #END
+    Wait For Detection Or Log Miss
     Click home button
-#    sleep     20s     #used to watch the result can be commentend if necessary
+    Close Browser
 
+Create empty augmented activity - Slow 3G
+    Open Web Application
+    Set Network Speed
+    Create Activity
+
+Select Type - Slow 3G
+    Select Activity Type    Augmented activity
+
+Edit activity details - Slow 3G
+    Edit Activity Title    activité numéro 1 Slow3G
+
+Snap the background - Slow 3G
+    Next button
+    Snap the background
+    Sleep    2s
+    Validate the image
+    Sleep    2s
+    Next button
+    Sleep    2s
+    Validation button
+
+Add video to the activity - Slow 3G
+    Add Video To Augmentation
+
+display activity - Slow 3G
+    Sleep    2s
+    Wait For Detection Or Log Miss
+    Click home button
     Close Browser
