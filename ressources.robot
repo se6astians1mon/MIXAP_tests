@@ -6,11 +6,14 @@ Library    Collections
 ${URL}    https://mixap-lium-preprod.univ-lemans.fr/
 ${RELATIVE_VIDEO_PATH}    ./assets/fakecamfeed_cortez.mjpeg
 ${ANIMATED_PATH}    ./assets/animated.gif
+# Browser to run the suite on: "chrome" (default) or "safari". Override with --variable BROWSER:safari.
+# Always read it through "Browser Is Chrome" rather than comparing the string directly.
+${BROWSER}    chrome
 
 
 *** Keywords ***
 Bypass https alert
-    [Documentation]    passe l'alerte en cas de certificat https invalide
+    [Documentation]    passe l'alerte en cas de certificat https invalide. Chrome-only: "details-button"/"proceed-link" are the ids of Chrome's own certificate interstitial page, which Safari does not have. Currently unused.
     Sleep    2
     Click Element    id=details-button
     Sleep    2
@@ -33,35 +36,61 @@ Set Chrome Options
     Call Method    ${options}    add_argument    --disable-features\=PasswordLeakDetection,LeakDetectionUnauthenticated,PasswordChange
     RETURN    ${options}
 
+Validate Browser Variable
+    [Documentation]    Normalise ${BROWSER} to lower case and fail fast unless it is "chrome" or "safari", so a typo in --variable BROWSER:... stops the run with a clear message instead of silently falling back to a default. Returns the normalised value.
+    ${browser}=    Evaluate    str($BROWSER).strip().lower()
+    IF    $browser not in ('chrome', 'safari')
+        Fail    Unsupported BROWSER '${BROWSER}': use --variable BROWSER:chrome (default) or --variable BROWSER:safari.
+    END
+    Set Global Variable    ${BROWSER}    ${browser}
+    RETURN    ${browser}
+
+Browser Is Chrome
+    [Documentation]    Return ${True} when the suite runs on Chrome (see ${BROWSER}), ${False} on Safari. The single place browser-specific branches test the browser - keywords call this instead of comparing ${BROWSER} themselves.
+    ${browser}=    Validate Browser Variable
+    RETURN    ${{ $browser == 'chrome' }}
+
+Open MIXAP Browser
+    [Documentation]    Open ${URL} in the browser selected by ${BROWSER}. Shared by every "Open Web Application*" keyword, which keep their own post-open steps. On Chrome this is exactly the historical behaviour: with ${fake_media} (the default) Chrome gets "Set Chrome Options" (fake camera/mic feed, auto-granted permissions); without it, plain Chrome. On Safari there is no options object and no fake media (see "Provide Marker Image" for how the camera is replaced), and safaridriver allows only ONE WebDriver session per machine, so any session still open (e.g. left behind by a failed test) is closed first - otherwise "Open Browser" itself would fail - and the window is maximized like the Chrome flows do.
+    [Arguments]    ${alias}=${None}    ${fake_media}=${True}
+    ${is_chrome}=    Browser Is Chrome
+    IF    ${is_chrome} and ${fake_media}
+        ${chrome_options}=    Set Chrome Options
+        Open Browser    ${URL}    chrome    options=${chrome_options}    alias=${alias}
+    ELSE IF    ${is_chrome}
+        Open Browser    ${URL}    chrome    alias=${alias}
+    ELSE
+        Close All Browsers
+        Open Browser    ${URL}    safari    alias=${alias}
+        Maximize Browser Window
+    END
+
 Open Web Application
-    [Documentation]    ouvre le site avec le navigateur chrome en suivant les paramètres
-    ${chrome_options}=    Set Chrome Options
+    [Documentation]    ouvre le site avec le navigateur choisi par ${BROWSER} (chrome par défaut, avec flux caméra/micro fictif) après avoir fermé tous les navigateurs ouverts - voir "Open MIXAP Browser"
     Close All Browsers
-    Open Browser    ${URL}    chrome    options=${CHROME_OPTIONS}
+    Open MIXAP Browser
     Title Should Be    MIXAP    timeout 10s
     Wait Until Element Is Visible    xpath=//button[text()='New activity']
     Suppress All Onboarding Tours
 
 Open Web Application with alias
-    [Documentation]    ouvre le site avec le navigateur chrome en suivant les paramètres et avec un alias en paramètres
+    [Documentation]    ouvre le site avec le navigateur choisi par ${BROWSER} et avec un alias en paramètres - voir "Open MIXAP Browser". Sur Safari, une seule session est possible : les suites qui gardent deux navigateurs ouverts (043, 049, 054) sont donc "chrome-only".
     [Arguments]    ${alias}
-    ${chrome_options}=    Set Chrome Options
-    Open Browser    ${URL}    chrome    options=${CHROME_OPTIONS}    alias=${alias}
+    Open MIXAP Browser    alias=${alias}
     Title Should Be    MIXAP    timeout 10s
     Wait Until Element Is Visible    xpath=//button[text()='New activity']
     Suppress All Onboarding Tours
 
 Open Web Application without closing
-    [Documentation]    ouvre le site avec le navigateur chrome en suivant les paramètres
-    ${chrome_options}=    Set Chrome Options
-    Open Browser    ${URL}    chrome    options=${CHROME_OPTIONS}
+    [Documentation]    ouvre le site avec le navigateur choisi par ${BROWSER} sans fermer les navigateurs déjà ouverts (sur Chrome) - voir "Open MIXAP Browser", qui ferme quand même l'éventuelle session restante sur Safari puisqu'une seule session y est possible
+    Open MIXAP Browser
     Title Should Be    MIXAP    timeout 10s
     Wait Until Element Is Visible    xpath=//button[text()='New activity']
     Suppress All Onboarding Tours
 
 Open Web Application Without Fake Media
-    [Documentation]    Open the site with plain Chrome (no fake camera/mic options). Used by tests that only need to confirm the app shell loads and don't drive the camera-dependent activity flows.
-    Open Browser    ${URL}    chrome
+    [Documentation]    Open the site without fake camera/mic options: plain Chrome, or Safari (which never has fake media) - see "Open MIXAP Browser". Used by tests that only need to confirm the app shell loads and don't drive the camera-dependent activity flows.
+    Open MIXAP Browser    fake_media=${False}
     Maximize Browser Window
 
 Create Activity
