@@ -10,4 +10,5 @@
 !/*.robot
 !/*.md
 !/requirements.txt
+!/*.sh
 CLAUDE.md
