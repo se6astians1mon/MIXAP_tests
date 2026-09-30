@@ -69,7 +69,7 @@ Open Web Application
     [Documentation]    ouvre le site avec le navigateur choisi par ${BROWSER} (chrome par défaut, avec flux caméra/micro fictif) après avoir fermé tous les navigateurs ouverts - voir "Open MIXAP Browser"
     Close All Browsers
     Open MIXAP Browser
-    Title Should Be    MIXAP    timeout 10s
+    Wait Until Keyword Succeeds    10s    1s    Title Should Be    MIXAP
     Wait Until Element Is Visible    xpath=//button[text()='New activity']
     Suppress All Onboarding Tours
 
@@ -77,14 +77,14 @@ Open Web Application with alias
     [Documentation]    ouvre le site avec le navigateur choisi par ${BROWSER} et avec un alias en paramètres - voir "Open MIXAP Browser". Sur Safari, une seule session est possible : les suites qui gardent deux navigateurs ouverts (043, 049, 054) sont donc "chrome-only".
     [Arguments]    ${alias}
     Open MIXAP Browser    alias=${alias}
-    Title Should Be    MIXAP    timeout 10s
+    Wait Until Keyword Succeeds    10s    1s    Title Should Be    MIXAP
     Wait Until Element Is Visible    xpath=//button[text()='New activity']
     Suppress All Onboarding Tours
 
 Open Web Application without closing
     [Documentation]    ouvre le site avec le navigateur choisi par ${BROWSER} sans fermer les navigateurs déjà ouverts (sur Chrome) - voir "Open MIXAP Browser", qui ferme quand même l'éventuelle session restante sur Safari puisqu'une seule session y est possible
     Open MIXAP Browser
-    Title Should Be    MIXAP    timeout 10s
+    Wait Until Keyword Succeeds    10s    1s    Title Should Be    MIXAP
     Wait Until Element Is Visible    xpath=//button[text()='New activity']
     Suppress All Onboarding Tours
 
