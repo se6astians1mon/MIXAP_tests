@@ -4,6 +4,7 @@ Library    OperatingSystem
 Resource       ./ressources.robot
 
 Suite Teardown    Run Keyword And Ignore Error    Close All Browsers
+Test Setup    Skip Chrome-Only Test On Safari
 
 *** Keywords ***
 Create Empty Augmented Activity For Audio Test
@@ -47,9 +48,11 @@ Create Empty Augmented Activity For Audio Test - Slow 3G
 
 *** Test Cases ***
 Open application and create an empty activity - for microphone test
+    [Tags]    safari-unverified
     Create Empty Augmented Activity For Audio Test
 
 Select the audio tool and use Microphone
+    [Tags]    chrome-only    safari-skip:microphone
     Click Element    xpath=//button[contains(@title, 'Audio')]
     Sleep    2s
     Click Element    xpath=//div[contains(@class, 'auras__popbar')]
@@ -65,9 +68,11 @@ Select the audio tool and use Microphone
     Close Browser
 
 Open application and create an empty activity - for upload test
+    [Tags]    safari-unverified
     Create Empty Augmented Activity For Audio Test
 
 Select the audio tool and upload a file
+    [Tags]    safari-unverified
     Click Element    xpath=//button[contains(@title, 'Audio')]
     Sleep    2s
     Click Element    xpath=//div[contains(@class, 'auras__popbar')]
@@ -78,9 +83,11 @@ Select the audio tool and upload a file
     Close Browser
 
 Open application and create an empty activity - for microphone test - Slow 3G
+    [Tags]    chrome-only    safari-skip:cdp-network
     Create Empty Augmented Activity For Audio Test - Slow 3G
 
 Select the audio tool and use Microphone - Slow 3G
+    [Tags]    chrome-only    safari-skip:cdp-state    safari-skip:microphone
     Click Element    xpath=//button[contains(@title, 'Audio')]
     Sleep    2s
     Click Element    xpath=//div[contains(@class, 'auras__popbar')]
@@ -96,9 +103,11 @@ Select the audio tool and use Microphone - Slow 3G
     Close Browser
 
 Open application and create an empty activity - for upload test - Slow 3G
+    [Tags]    chrome-only    safari-skip:cdp-network
     Create Empty Augmented Activity For Audio Test - Slow 3G
 
 Select the audio tool and upload a file - Slow 3G
+    [Tags]    chrome-only    safari-skip:cdp-state
     Click Element    xpath=//button[contains(@title, 'Audio')]
     Sleep    2s
     Click Element    xpath=//div[contains(@class, 'auras__popbar')]

@@ -5,6 +5,7 @@ Library    String
 Resource       ./ressources.robot
 
 Suite Teardown    Run Keyword And Ignore Error    Close All Browsers
+Test Tags    safari-unverified
 
 *** Test Cases ***
 Selecting Pair Association for the first time starts its onboarding tour and walks through it

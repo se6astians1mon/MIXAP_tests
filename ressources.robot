@@ -9,6 +9,18 @@ ${ANIMATED_PATH}    ./assets/animated.gif
 # Browser to run the suite on: "chrome" (default) or "safari". Override with --variable BROWSER:safari.
 # Always read it through "Browser Is Chrome" rather than comparing the string directly.
 ${BROWSER}    chrome
+# Human-readable reason for each "safari-skip:<reason>" test tag, reported by "Skip Chrome-Only Test On Safari".
+# Keep in sync with SKIP_REASONS in tools/safari_compatibility.py.
+&{SAFARI_SKIP_REASONS}
+...    cdp-network=uses Chrome DevTools Protocol network emulation (Go Offline / Set Network Speed)
+...    cdp-state=continues a browser session that an earlier test took offline or throttled via CDP
+...    offline-suite=suite exercises offline behaviour, which needs CDP network emulation
+...    concurrent-browsers=needs two concurrent browser sessions; safaridriver allows only one
+...    microphone=records from the microphone; Safari has no fake microphone
+...    camera-todo=needs a camera snap; the Safari upload sequence for this activity type is not yet determined
+...    camera-detection=asserts marker detection, which needs a live camera feed
+...    onboarding-camera=onboarding tour steps target the camera capture controls
+...    session-of-skipped=continues the browser session of a test that is skipped on Safari
 
 
 *** Keywords ***
@@ -49,6 +61,21 @@ Browser Is Chrome
     [Documentation]    Return ${True} when the suite runs on Chrome (see ${BROWSER}), ${False} on Safari. The single place browser-specific branches test the browser - keywords call this instead of comparing ${BROWSER} themselves.
     ${browser}=    Validate Browser Variable
     RETURN    ${{ $browser == 'chrome' }}
+
+Skip Chrome-Only Test On Safari
+    [Documentation]    Used as "Test Setup" by every suite that contains tests tagged "chrome-only". No-op on Chrome. On any other browser, SKIPs a "chrome-only" test with the reason(s) given by its "safari-skip:<reason>" tags (see ${SAFARI_SKIP_REASONS} and SAFARI_COMPATIBILITY.md). Safari runs normally exclude these tests with "--exclude chrome-only"; this makes them report a clear SKIP instead of a confusing FAIL if that flag is forgotten - including the chained tests (e.g. "Select Type - Slow 3G") that never call a CDP keyword themselves but continue a session an earlier test throttled.
+    ${is_chrome}=    Browser Is Chrome
+    IF    ${is_chrome} or 'chrome-only' not in $TEST_TAGS    RETURN
+    ${reasons}=    Create List
+    FOR    ${tag}    IN    @{TEST_TAGS}
+        IF    $tag.startswith('safari-skip:')
+            ${key}=    Evaluate    $tag.split(':', 1)[1]
+            ${reason}=    Get From Dictionary    ${SAFARI_SKIP_REASONS}    ${key}    default=${key}
+            Append To List    ${reasons}    ${reason}
+        END
+    END
+    ${reason_text}=    Evaluate    '; '.join($reasons) or 'tagged chrome-only'
+    Skip    Not supported on ${BROWSER}: ${reason_text}
 
 Open MIXAP Browser
     [Documentation]    Open ${URL} in the browser selected by ${BROWSER}. Shared by every "Open Web Application*" keyword, which keep their own post-open steps. On Chrome this is exactly the historical behaviour: with ${fake_media} (the default) Chrome gets "Set Chrome Options" (fake camera/mic feed, auto-granted permissions); without it, plain Chrome. On Safari there is no options object and no fake media (see "Provide Marker Image" for how the camera is replaced), and safaridriver allows only ONE WebDriver session per machine, so any session still open (e.g. left behind by a failed test) is closed first - otherwise "Open Browser" itself would fail - and the window is maximized like the Chrome flows do.
