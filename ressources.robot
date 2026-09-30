@@ -151,8 +151,20 @@ Use template image
     [Documentation]    use a template image instead of taking a photo
     Sleep    2s
     Wait Until Element Is Visible    xpath=//span[text()='upload image']
-    Choose File    xpath=//input[@type='file']    ${EXECDIR}/assets/animated.gif
+    Choose File Robust    xpath=//input[@type='file']    ${EXECDIR}/assets/animated.gif
     
+Choose File Robust
+    [Documentation]    "Choose File" for the app's upload inputs, most of which are Ant Design "Upload" components whose underlying "input[type=file]" is intentionally CSS-hidden (see "Add Audio To Augmentation" / "Add 3D Object To Augmentation"). On Chrome this is exactly a plain "Choose File" - ChromeDriver accepts file paths on hidden inputs. On Safari, safaridriver can reject sending keys to a non-interactable element (ElementNotInteractable), so the input is first made interactable via JavaScript (display, visibility, opacity, and a 1px size if it renders at zero width/height) - it stays a real file input, so the app's own onChange handler still receives the file. UNVERIFIED on Safari: not yet executed there (tests using it are tagged "safari-unverified").
+    [Arguments]    ${locator}    ${file_path}
+    ${is_chrome}=    Browser Is Chrome
+    IF    ${is_chrome}
+        Choose File    ${locator}    ${file_path}
+    ELSE
+        ${input}=    Get WebElement    ${locator}
+        Execute Javascript    var el = arguments[0]; el.style.display = 'block'; el.style.visibility = 'visible'; el.style.opacity = '1'; if (el.offsetWidth === 0) { el.style.width = '1px'; } if (el.offsetHeight === 0) { el.style.height = '1px'; }    ARGUMENTS    ${input}
+        Choose File    ${input}    ${file_path}
+    END
+
 Select Activity Type
     [Documentation]    Select the activity type using a parameter
     [Arguments]    ${activity_type}
@@ -231,7 +243,7 @@ Add Image To Augmentation
     Click Element    xpath=//button[@title='Image']
     Wait Until Element Is Visible    xpath=//h5[contains(text(), 'Click to edit...')]    15s
     Click Element    xpath=//h5[contains(text(), 'Click to edit...')]
-    Choose File    xpath=//input[@type='file']    ${file_path}
+    Choose File Robust    xpath=//input[@type='file']    ${file_path}
     IF    ${click_next}
         Next button
     END
@@ -243,7 +255,7 @@ Add Video To Augmentation
     Click Element    xpath=//button[@title='Video']
     Wait Until Element Is Visible    xpath=//div[contains(@class, 'ant-typography') and contains(., 'Click to edit...')]    15s
     Click Element    xpath=//div[contains(@class, 'ant-typography') and contains(., 'Click to edit...')]
-    Choose File    xpath=//input[@type='file']    ${file_path}
+    Choose File Robust    xpath=//input[@type='file']    ${file_path}
     Next button
 
 Add Sticker To Augmentation
@@ -255,11 +267,11 @@ Add Sticker To Augmentation
     Next button
 
 Add Audio To Augmentation
-    [Documentation]    Add an audio overlay to the currently open augmentation, uploading a local sound file. Verified live against the app source ("PaletteButtonsBar.tsx" / "AAudio.tsx"): clicking the "Audio" toolbar button no longer opens an upload modal - it now behaves like "Add Sheet To Augmentation"'s Note tool, immediately placing an empty AAudio aura on the canvas whose controls popover (containing the file-upload button) is open by default ("visibleControls" state defaults to true in AAudio.tsx). The underlying "input[type=file]" (rendered by Ant Design's "Upload" component) is intentionally CSS-hidden and never becomes "visible" - confirmed live the popover's visible upload/mic/delete icons render immediately while the input stays hidden - so this waits for it to exist in the DOM ("Wait Until Page Contains Element"), not to become visible, before "Choose File" (which works on hidden file inputs). There is no separate "confirm/validate" step - selecting the file alone updates the aura's content via the form's onChange.
+    [Documentation]    Add an audio overlay to the currently open augmentation, uploading a local sound file. Verified live against the app source ("PaletteButtonsBar.tsx" / "AAudio.tsx"): clicking the "Audio" toolbar button no longer opens an upload modal - it now behaves like "Add Sheet To Augmentation"'s Note tool, immediately placing an empty AAudio aura on the canvas whose controls popover (containing the file-upload button) is open by default ("visibleControls" state defaults to true in AAudio.tsx). The underlying "input[type=file]" (rendered by Ant Design's "Upload" component) is intentionally CSS-hidden and never becomes "visible" - confirmed live the popover's visible upload/mic/delete icons render immediately while the input stays hidden - so this waits for it to exist in the DOM ("Wait Until Page Contains Element"), not to become visible, before "Choose File Robust" (plain "Choose File" on Chrome, which works on hidden file inputs; on Safari it unhides the input first). There is no separate "confirm/validate" step - selecting the file alone updates the aura's content via the form's onChange.
     Wait Until Element Is Visible    xpath=//button[@title='Audio']    15s
     Click Element    xpath=//button[@title='Audio']
     Wait Until Page Contains Element    xpath=//input[@type='file']    15s
-    Choose File    xpath=//input[@type='file']    ${EXECDIR}/assets/1645.mp3
+    Choose File Robust    xpath=//input[@type='file']    ${EXECDIR}/assets/1645.mp3
     Sleep    2s
     Next button
 
@@ -278,12 +290,12 @@ Add Sheet To Augmentation
     Next button
 
 Add 3D Object To Augmentation
-    [Documentation]    Add a 3D object overlay to the currently open augmentation, using the provided model file. Set ${click_next}=${False} to upload without advancing, e.g. when uploading several formats in a row and only the last one should proceed. Verified live against the app source ("A3d.tsx"): the "Click to edit..." text is just placeholder content shown inside the canvas element - clicking it used to work but now gets intercepted by the aura's own controls popover, which is open by default and already exposes the file-upload input directly, so this goes straight to "Choose File" without clicking the placeholder (same fix as "Add Audio To Augmentation"). That underlying "input[type=file]" is intentionally CSS-hidden by Ant Design's "Upload" component and never becomes "visible", so this waits for it to exist in the DOM rather than to become visible.
+    [Documentation]    Add a 3D object overlay to the currently open augmentation, using the provided model file. Set ${click_next}=${False} to upload without advancing, e.g. when uploading several formats in a row and only the last one should proceed. Verified live against the app source ("A3d.tsx"): the "Click to edit..." text is just placeholder content shown inside the canvas element - clicking it used to work but now gets intercepted by the aura's own controls popover, which is open by default and already exposes the file-upload input directly, so this goes straight to "Choose File Robust" without clicking the placeholder (same fix as "Add Audio To Augmentation"). That underlying "input[type=file]" is intentionally CSS-hidden by Ant Design's "Upload" component and never becomes "visible", so this waits for it to exist in the DOM rather than to become visible - and uploads through "Choose File Robust", which unhides it first on Safari.
     [Arguments]    ${file_path}    ${click_next}=${True}
     Wait Until Element Is Visible    xpath=//button[@title='3D']    15s
     Click Element    xpath=//button[@title='3D']
     Wait Until Page Contains Element    xpath=//input[@type='file']    15s
-    Choose File    xpath=//input[@type='file']    ${file_path}
+    Choose File Robust    xpath=//input[@type='file']    ${file_path}
     Sleep    2
     IF    ${click_next}
         Next button
@@ -953,10 +965,10 @@ Create basic pairs activity
     Sleep    2s
     Wait Until Element Is Visible    xpath=//span[contains(@class, ant-upload-btn)]    15s
     Click Element    xpath=//span[contains(@class, ant-upload-btn)]
-    Choose File   xpath=//input[@type='file']    ${EXECDIR}/assets/fakecamfeed_cortez.png
+    Choose File Robust    xpath=//input[@type='file']    ${EXECDIR}/assets/fakecamfeed_cortez.png
     Sleep    2s
     Click Element    xpath=//span[contains(@class, ant-upload-btn)]
-    Choose File   xpath=//input[@type='file']    ${EXECDIR}/assets/cat.webp
+    Choose File Robust    xpath=//input[@type='file']    ${EXECDIR}/assets/cat.webp
     Sleep    2s
     Next button
     Sleep    2s
@@ -1024,7 +1036,7 @@ Furnish layers with content
         Sleep    2s
         Click Element    xpath=//h5[contains(@class, 'ant-typography') and text()='Click to edit...']
         Click Element    xpath=//button[contains(@class, 'ant-btn')]
-        Choose File   xpath=//input[@type='file']    ${EXECDIR}/assets/cat.webp
+        Choose File Robust    xpath=//input[@type='file']    ${EXECDIR}/assets/cat.webp
         Wait Until Element Is Visible    xpath=//button[contains(@title, 'Expand Layers')]    15s
         Click Element    xpath=//button[contains(@title, 'Expand Layers')] 
         Sleep    2s

@@ -17,7 +17,7 @@ Add Audio To Augmentation Via Upload And Finalize
     Click Element    xpath=//button[contains(@title, 'Audio')]
     Sleep    2s
     Click Element    xpath=//div[contains(@class, 'auras__popbar')]
-    Choose File    id=basic_file    ${EXECDIR}/assets/moo1.wav
+    Choose File Robust    id=basic_file    ${EXECDIR}/assets/moo1.wav
     Sleep    2s
     Click Element    xpath=//div[contains(@class, 'auras__popbar')]
     Sleep    5s
