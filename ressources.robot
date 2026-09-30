@@ -595,7 +595,7 @@ Click Activity Card
     Click Element    xpath=//div[h3[contains(@class, 'activity-card') and text()='${activity_title}']]
 
 Add Activity to Path
-    [Documentation]    Add an activity to the path using the provided activity title. When ${path_title} is given, the drop target is scoped to that specific path's card, which matters when the account has more than one path visible on screen.
+    [Documentation]    Add an activity to the path using the provided activity title. When ${path_title} is given, the drop target is scoped to that specific path's card, which matters when the account has more than one path visible on screen. Safari: runs the same Selenium action chain (no JavaScript fallback) - UNVERIFIED there, since which events the app listens for (pointer/mouse vs HTML5 drag-and-drop) is not confirmed; callers are tagged "safari-unverified".
     [Arguments]    ${activity_title}    ${path_title}=${EMPTY}
     Wait Until Element Is Visible    xpath=//div[h3[contains(@class, 'activity-card') and text()='${activity_title}']]    15s
     Wait Until Keyword Succeeds    3x    2s    Click Activity Card    ${activity_title}
@@ -621,7 +621,7 @@ Click Activity Card By Id
     Click Element    ${card}
 
 Add Activity to Path By Id
-    [Documentation]    Add an activity to a path, both identified by their unique "data-id" rather than title text. Immune to duplicate or stale-data titles anywhere else on the page. The drag is started from the card's title-wrapper (not the full card) because Selenium's synthetic drag grabs the element's center point, and the full card's center can land on an action button (like/sync/menu) instead of empty space, silently breaking the drag. The drop itself is done as Mouse Down / Mouse Over / Sleep / Mouse Up instead of the single-shot "Drag And Drop" keyword, because the app needs a brief hover over the drop zone to register the dragover state before the mouse is released - "Drag And Drop" releases immediately after arriving, which is too fast for it to pick up.
+    [Documentation]    Add an activity to a path, both identified by their unique "data-id" rather than title text. Immune to duplicate or stale-data titles anywhere else on the page. The drag is started from the card's title-wrapper (not the full card) because Selenium's synthetic drag grabs the element's center point, and the full card's center can land on an action button (like/sync/menu) instead of empty space, silently breaking the drag. The drop itself is done as Mouse Down / Mouse Over / Sleep / Mouse Up instead of the single-shot "Drag And Drop" keyword, because the app needs a brief hover over the drop zone to register the dragover state before the mouse is released - "Drag And Drop" releases immediately after arriving, which is too fast for it to pick up. Safari: runs the same Selenium action chain (no JavaScript fallback) - UNVERIFIED there, since which events the app listens for (pointer/mouse vs HTML5 drag-and-drop) is not confirmed; callers are tagged "safari-unverified".
     [Arguments]    ${activity_id}    ${path_id}
     ${activity_card}=    Set Variable    xpath=//div[contains(@class, 'activity-card') and @data-id='${activity_id}']
     ${drag_source}=    Set Variable    ${activity_card}//div[contains(@class,'activity-card__title-wrapper')]
@@ -942,7 +942,7 @@ Create basic search and find activity
     Sleep    5s
 
 Create failed search and find activity
-    [Documentation]    Create a basic search and find activity with a title, instructions, use a photo and validate
+    [Documentation]    Create a basic search and find activity with a title, instructions, use a photo and validate Safari: runs the same Selenium action chain (no JavaScript fallback) - UNVERIFIED there, since which events the app listens for (pointer/mouse vs HTML5 drag-and-drop) is not confirmed; callers are tagged "safari-unverified".
     [Arguments]    ${title}    ${instructions}
     Create Activity
     Select Activity Type    Search and Find
