@@ -462,7 +462,9 @@ Create empty path
     Wait Until Element Is Visible    xpath=//div[h3[contains(@class, 'activity-card__title activity-card__title--large-light') and text()='${title}']]    15s
 
 Go Offline
-    [Documentation]    Set the browser to offline mode using Chrome DevTools Protocol (CDP)
+    [Documentation]    Set the browser to offline mode using Chrome DevTools Protocol (CDP). Chrome-only: on any other browser (see ${BROWSER}) this SKIPs the current test with an explicit reason instead of failing, since CDP does not exist there - tests that need it are tagged "chrome-only" (see SAFARI_COMPATIBILITY.md).
+    ${is_chrome}=    Browser Is Chrome
+    Skip If    not ${is_chrome}    Network emulation requires Chrome DevTools Protocol; not available on ${BROWSER}
     ${seleniumlib}    Get Library Instance    SeleniumLibrary
     VAR    ${webdriver}    ${seleniumlib.driver}
     # SetOffline
@@ -472,7 +474,9 @@ Go Offline
     Call Method    ${webdriver}    execute_cdp_cmd    Network.emulateNetworkConditions    ${conditions}
 
 Go Online
-    [Documentation]    Set the browser to online mode using Chrome DevTools Protocol (CDP)
+    [Documentation]    Set the browser to online mode using Chrome DevTools Protocol (CDP). Chrome-only: on any other browser (see ${BROWSER}) this SKIPs the current test with an explicit reason instead of failing, since CDP does not exist there - tests that need it are tagged "chrome-only" (see SAFARI_COMPATIBILITY.md).
+    ${is_chrome}=    Browser Is Chrome
+    Skip If    not ${is_chrome}    Network emulation requires Chrome DevTools Protocol; not available on ${BROWSER}
     ${seleniumlib}    Get Library Instance    SeleniumLibrary
     VAR    ${webdriver}    ${seleniumlib.driver}
     # SetOffline
@@ -482,8 +486,10 @@ Go Online
     Call Method    ${webdriver}    execute_cdp_cmd    Network.emulateNetworkConditions    ${conditions}
 
 Set Network Speed
-    [Documentation]    Throttle the network using Chrome DevTools Protocol (CDP), for testing behavior under a slow connection instead of going fully offline. Defaults roughly match Chrome DevTools' "Slow 3G" preset (2000ms latency, ~62.5 KB/s down/up). Call "Reset Network Speed" afterwards to remove the throttling.
+    [Documentation]    Throttle the network using Chrome DevTools Protocol (CDP), for testing behavior under a slow connection instead of going fully offline. Defaults roughly match Chrome DevTools' "Slow 3G" preset (2000ms latency, ~62.5 KB/s down/up). Call "Reset Network Speed" afterwards to remove the throttling. Chrome-only: on any other browser (see ${BROWSER}) this SKIPs the current test with an explicit reason instead of failing, since CDP does not exist there - tests that need it are tagged "chrome-only" (see SAFARI_COMPATIBILITY.md).
     [Arguments]    ${latency}=2000    ${download_throughput}=62500    ${upload_throughput}=62500
+    ${is_chrome}=    Browser Is Chrome
+    Skip If    not ${is_chrome}    Network emulation requires Chrome DevTools Protocol; not available on ${BROWSER}
     ${latency}=    Convert To Integer    ${latency}
     ${download_throughput}=    Convert To Integer    ${download_throughput}
     ${upload_throughput}=    Convert To Integer    ${upload_throughput}
@@ -493,7 +499,9 @@ Set Network Speed
     Call Method    ${webdriver}    execute_cdp_cmd    Network.emulateNetworkConditions    ${conditions}
 
 Reset Network Speed
-    [Documentation]    Remove any network throttling applied via "Set Network Speed" or "Go Offline", restoring a normal, unthrottled connection. A throughput of -1 tells CDP not to limit that direction at all.
+    [Documentation]    Remove any network throttling applied via "Set Network Speed" or "Go Offline", restoring a normal, unthrottled connection. A throughput of -1 tells CDP not to limit that direction at all. Chrome-only: on any other browser (see ${BROWSER}) this SKIPs the current test with an explicit reason instead of failing, since CDP does not exist there - tests that need it are tagged "chrome-only" (see SAFARI_COMPATIBILITY.md).
+    ${is_chrome}=    Browser Is Chrome
+    Skip If    not ${is_chrome}    Network emulation requires Chrome DevTools Protocol; not available on ${BROWSER}
     ${seleniumlib}=    Get Library Instance    SeleniumLibrary
     VAR    ${webdriver}    ${seleniumlib.driver}
     ${conditions}=    Create Dictionary    offline=${False}    latency=${0}    downloadThroughput=${-1}    uploadThroughput=${-1}
