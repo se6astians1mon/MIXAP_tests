@@ -4,6 +4,7 @@
 # Allow .gitignore itself so it can be tracked
 !/.gitignore
 !/assets
+!/tools
 !/.github
 # Allow all .robot files in the root directory
 !/*.robot
