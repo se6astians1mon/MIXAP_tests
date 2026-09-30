@@ -26,9 +26,7 @@ Edit activity details
 Snap the landscape
     [Tags]    chrome-only    safari-skip:camera-todo
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Pair Association
     Sleep    2s
 
 upload the 2nd image
@@ -79,9 +77,7 @@ Edit activity details - Slow 3G
 Snap the landscape - Slow 3G
     [Tags]    chrome-only    safari-skip:cdp-state    safari-skip:camera-todo
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Pair Association
     Sleep    2s
 
 upload the 2nd image - Slow 3G

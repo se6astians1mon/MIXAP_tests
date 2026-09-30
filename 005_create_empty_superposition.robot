@@ -25,9 +25,7 @@ Snap the landscape
     [Tags]    chrome-only    safari-skip:camera-todo
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Information layers
 
 display activity
     [Tags]    chrome-only    safari-skip:session-of-skipped
@@ -60,9 +58,7 @@ Snap the landscape - Slow 3G
     [Tags]    chrome-only    safari-skip:cdp-state    safari-skip:camera-todo
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Information layers
 
 display activity - Slow 3G
     [Tags]    chrome-only    safari-skip:cdp-state

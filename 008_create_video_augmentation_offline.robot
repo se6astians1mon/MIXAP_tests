@@ -21,9 +21,7 @@ Edit activity details
 
 Snap the background
     Next button
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Augmented activity
     Sleep    2s
     Next button
     Sleep    2s

@@ -17,9 +17,7 @@ Create first activity with tag one only
     Edit Activity Instructions    instruction relative à l'activité numéro 1
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    activity_type=Augmented activity
     Sleep    2s
     Next button
     Sleep    2s
@@ -39,9 +37,7 @@ Create second activity with tag two only
     Edit Activity Instructions    instruction relative à l'activité numéro 2
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    activity_type=Augmented activity
     Sleep    2s
     Next button
     Sleep    2s
@@ -62,9 +58,7 @@ Create third activity with both tags
     Edit Activity Instructions    instruction relative à l'activité numéro 3
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    activity_type=Augmented activity
     Sleep    2s
     Next button
     Sleep    2s
@@ -117,9 +111,7 @@ Create first activity with tag one only - Slow 3G
     Edit Activity Instructions    instruction relative à l'activité numéro 1
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    activity_type=Augmented activity
     Sleep    2s
     Next button
     Sleep    2s
@@ -139,9 +131,7 @@ Create second activity with tag two only - Slow 3G
     Edit Activity Instructions    instruction relative à l'activité numéro 2
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    activity_type=Augmented activity
     Sleep    2s
     Next button
     Sleep    2s
@@ -162,9 +152,7 @@ Create third activity with both tags - Slow 3G
     Edit Activity Instructions    instruction relative à l'activité numéro 3
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    activity_type=Augmented activity
     Sleep    2s
     Next button
     Sleep    2s

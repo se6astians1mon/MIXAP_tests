@@ -28,9 +28,7 @@ Create activity with 3D object while online
     Edit Activity Title    offline 3d object activity ${run_suffix}
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s

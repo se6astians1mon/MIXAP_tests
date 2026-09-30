@@ -25,9 +25,7 @@ Snap the landscape
     [Tags]    safari-unverified
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Search and Find
 
 display activity
     [Tags]    safari-unverified
@@ -60,9 +58,7 @@ Snap the landscape - Slow 3G
     [Tags]    chrome-only    safari-skip:cdp-state
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Search and Find
 
 display activity - Slow 3G
     [Tags]    chrome-only    safari-skip:cdp-state

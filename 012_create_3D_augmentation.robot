@@ -23,9 +23,7 @@ Edit activity details
 Snap the background
     [Tags]    safari-unverified
     Next button
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s
@@ -59,9 +57,7 @@ Edit activity details - Slow 3G
 Snap the background - Slow 3G
     [Tags]    chrome-only    safari-skip:cdp-state
     Next button
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s

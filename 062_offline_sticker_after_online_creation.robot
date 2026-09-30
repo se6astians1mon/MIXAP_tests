@@ -28,9 +28,7 @@ Create activity with sticker while online
     Edit Activity Title    offline sticker activity ${run_suffix}
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Augmented activity
     Sleep    2s
     Next button
     Sleep    2s

@@ -40,9 +40,7 @@ Create activity with audio while online
     Edit Activity Title    offline audio activity ${run_suffix}
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s

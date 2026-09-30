@@ -24,9 +24,7 @@ Edit activity details
 
 Snap the landscape
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Pair Association
     Sleep    2s
 
 upload the 2nd image

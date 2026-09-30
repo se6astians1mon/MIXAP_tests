@@ -17,9 +17,7 @@ Create Empty Augmented Activity For Audio Test
     Edit Activity Title    Audio Tool Test
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s
@@ -37,9 +35,7 @@ Create Empty Augmented Activity For Audio Test - Slow 3G
     Edit Activity Title    Audio Tool Test Slow3G
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s

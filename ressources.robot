@@ -9,6 +9,9 @@ ${ANIMATED_PATH}    ./assets/animated.gif
 # Browser to run the suite on: "chrome" (default) or "safari". Override with --variable BROWSER:safari.
 # Always read it through "Browser Is Chrome" rather than comparing the string directly.
 ${BROWSER}    chrome
+# Marker image uploaded by "Provide Marker Image" on Safari, which has no fake camera: a frame of the same
+# fakecamfeed_cortez feed Chrome's fake camera streams, so marker quality stays comparable.
+${SAFARI_MARKER_IMAGE}    ${EXECDIR}/assets/fakecamfeed_cortez.png
 # Human-readable reason for each "safari-skip:<reason>" test tag, reported by "Skip Chrome-Only Test On Safari".
 # Keep in sync with SKIP_REASONS in tools/safari_compatibility.py.
 &{SAFARI_SKIP_REASONS}
@@ -153,6 +156,22 @@ Use template image
     Wait Until Element Is Visible    xpath=//span[text()='upload image']
     Choose File Robust    xpath=//input[@type='file']    ${EXECDIR}/assets/animated.gif
     
+Provide Marker Image
+    [Documentation]    Provide the marker (background) image on the marker step of the activity wizard. On Chrome this is exactly the historical camera flow: "Snap the background" (Chrome's fake camera streams assets/fakecamfeed_cortez.y4m), ${settle} of waiting, then "Validate the image". Safari has no fake camera, so there it uploads ${SAFARI_MARKER_IMAGE} instead through the wizard's "upload image" control - the same path "Use template image" takes. The upload path has NO "Validate the image" step: the uploaded image goes straight to compilation, so callers continue with "Next button" / "Validation button" exactly as after the snap (evidenced for "Augmented activity" by 051_empty_animated_augment.robot and for "Search and Find" by "Create failed search and find activity"). For any other ${activity_type} the Safari step sequence has not been determined yet (TODO, see SAFARI_COMPATIBILITY.md), so the test SKIPs rather than guessing.
+    [Arguments]    ${activity_type}    ${settle}=2s
+    ${is_chrome}=    Browser Is Chrome
+    IF    ${is_chrome}
+        Snap the background
+        Sleep    ${settle}
+        Validate the image
+    ELSE IF    $activity_type in ('Augmented activity', 'Search and Find')
+        Sleep    2s
+        Wait Until Element Is Visible    xpath=//span[text()='upload image']
+        Choose File Robust    xpath=//input[@type='file']    ${SAFARI_MARKER_IMAGE}
+    ELSE
+        Skip    Marker image on ${BROWSER}: no fake camera, and the upload sequence for "${activity_type}" has not been determined yet (TODO)
+    END
+
 Choose File Robust
     [Documentation]    "Choose File" for the app's upload inputs, most of which are Ant Design "Upload" components whose underlying "input[type=file]" is intentionally CSS-hidden (see "Add Audio To Augmentation" / "Add 3D Object To Augmentation"). On Chrome this is exactly a plain "Choose File" - ChromeDriver accepts file paths on hidden inputs. On Safari, safaridriver can reject sending keys to a non-interactable element (ElementNotInteractable), so the input is first made interactable via JavaScript (display, visibility, opacity, and a 1px size if it renders at zero width/height) - it stays a real file input, so the app's own onChange handler still receives the file. UNVERIFIED on Safari: not yet executed there (tests using it are tagged "safari-unverified").
     [Arguments]    ${locator}    ${file_path}
@@ -452,9 +471,7 @@ Create empty augmented activity
     Edit Activity Title    ${title}
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    5s
-    Validate the image
+    Provide Marker Image    Augmented activity    settle=5s
     Sleep    2s
     Next button
     Sleep    2s
@@ -476,9 +493,7 @@ Create empty validation
     Edit Activity Instructions    ${instructions}
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Search and Find
     Sleep    2s
     Next button
     Sleep    2s
@@ -917,9 +932,7 @@ Create basic search and find activity
     Edit Activity Instructions    ${instructions}
     Click Element    xpath=//button[contains(@class, 'ant-btn-primary') and contains(@class, 'editor__nav-button') and contains(@class, 'editor__nav-button--primary')]
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Search and Find
     Sleep    2s
     Next button
     Sleep    2s
@@ -986,9 +999,7 @@ Create basic layers activity
     Edit Activity Instructions    ${instructions}
     Click Element    xpath=//button[contains(@class, 'ant-btn-primary') and contains(@class, 'editor__nav-button') and contains(@class, 'editor__nav-button--primary')]
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Information layers
     Sleep    2s
     Next button
     Sleep    2s
@@ -1008,9 +1019,7 @@ Create basic layers activity without validation
     Edit Activity Instructions    ${instructions}
     Click Element    xpath=//button[contains(@class, 'ant-btn-primary') and contains(@class, 'editor__nav-button') and contains(@class, 'editor__nav-button--primary')]
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Information layers
     Sleep    2s
     Next button
     Sleep    5s

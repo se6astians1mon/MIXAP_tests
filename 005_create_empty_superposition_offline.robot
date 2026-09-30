@@ -24,9 +24,7 @@ Edit activity details
 Snap the landscape
     Next button
     Sleep    2s
-    Snap the background
-    Sleep    2s
-    Validate the image
+    Provide Marker Image    Information layers
 
 display activity
     Next button
