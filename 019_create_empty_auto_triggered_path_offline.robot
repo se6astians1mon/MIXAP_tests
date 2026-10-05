@@ -12,5 +12,5 @@ Create empty path offline
     Open Web Application
     Maximize Browser Window
     Go Offline
-    Create empty path    path_type=Auto-Triggered path
+    Create empty path    path_type=Auto-Triggered Path
     Close Browser
