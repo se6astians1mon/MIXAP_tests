@@ -136,8 +136,9 @@ Create Path
     Wait Until Element Is Visible    xpath=//div[h3[text()='Free Exploration Path']]
 
 Next button
-    [Documentation]    clic sur le bouton suivant en bas a droite de l'application pour passer a l'étape suivante. Verified live against the app source ("Editor.tsx"): the classes "ant-btn-primary editor__nav-button editor__nav-button--primary" are the real, stable ones - the "css-XXXXXX" hash also present on the element is an Ant Design/emotion runtime style hash that regenerates on every app build/rebuild, so it must never be baked into a xpath "contains()" match (this had gone stale and was breaking the keyword before this fix).
+    [Documentation]    clic sur le bouton suivant en bas a droite de l'application pour passer a l'étape suivante. Verified live against the app source ("Editor.tsx"): the classes "ant-btn-primary editor__nav-button editor__nav-button--primary" are the real, stable ones - the "css-XXXXXX" hash also present on the element is an Ant Design/emotion runtime style hash that regenerates on every app build/rebuild, so it must never be baked into a xpath "contains()" match (this had gone stale and was breaking the keyword before this fix). Also waits for the button to be ENABLED, not just visible: since the preprod app build of 2026-10-02, saving the marker photo starts the marker compilation in the background right away, and during it this same button turns into a disabled "Preparing marker… N%" loading button (~14s locally, longer on slower CI machines). Clicking it then is a silent no-op - the wizard never advances and "Validation button" times out waiting for the marker-features modal (this broke every marker-based test, confirmed live). The generous timeout covers slow machines; when the button is already enabled (every other step) the wait returns immediately.
     Wait Until Element Is Visible    xpath=//button[contains(@class, 'ant-btn-primary') and contains(@class, 'editor__nav-button') and contains(@class, 'editor__nav-button--primary')]    10s
+    Wait Until Element Is Enabled    xpath=//button[contains(@class, 'ant-btn-primary') and contains(@class, 'editor__nav-button') and contains(@class, 'editor__nav-button--primary')]    120s
     Click Element    xpath=//button[contains(@class, 'ant-btn-primary') and contains(@class, 'editor__nav-button') and contains(@class, 'editor__nav-button--primary')]
 
 Snap the background
@@ -505,7 +506,7 @@ Create empty validation
     Click home button
 
 Create empty path
-    [Documentation]    Create an empty path with a title and instructions. Defaults to "Free Exploration Path"; pass ${path_type} to create one of the other path types instead (e.g. "Auto-Triggered path", "Guided Path").
+    [Documentation]    Create an empty path with a title and instructions. Defaults to "Free Exploration Path"; pass ${path_type} to create one of the other path types instead (e.g. "Auto-Triggered Path", "Guided Path").
     [Arguments]    ${title}=parcours numéro 1    ${instructions}=instruction relative au parcours numéro 1    ${path_type}=Free Exploration Path
     Create Path
     Select Path Type    ${path_type}
